@@ -11,7 +11,7 @@ os.makedirs(output_folder, exist_ok=True)
 detector = MTCNN()
 
 def extract_and_save_face(image_path):
-    img = Image.open(image_path)
+    img = Image.open(image_path)            
     img = img.convert("RGB")
     pixels = np.array(img)
 
