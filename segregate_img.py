@@ -55,11 +55,20 @@ dest_folder = os.path.join(SEARCH_RESULTS_DIR, pred_label)
 os.makedirs(dest_folder, exist_ok=True)
 
 copied_count = 0
+
 with open(MAPPING_FILE, "r", encoding="utf-8") as f:
     for line in f:
         path, label = line.strip().split("|")
         if label.lower() == pred_label.lower():
-            shutil.copy(path, dest_folder)
-            copied_count += 1
+            filename = os.path.basename(path)
+            original_path = os.path.join("dataset", label, filename)
+            
+            if os.path.exists(original_path):
+                shutil.copy(original_path, dest_folder)
+                copied_count += 1
+            else:
+                print(f"⚠️ Original file not found: {original_path}")
+
+
 
 print(f"✅ {copied_count} images copied to: {dest_folder}")
