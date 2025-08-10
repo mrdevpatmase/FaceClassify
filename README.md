@@ -8,23 +8,29 @@ This project uses deep learning to classify faces using **CNN (Convolutional Neu
 
 ## 📂 Project Structure
 
-├── embeddings.npy # Face embeddings
-├── labels.npy # Corresponding labels (names)
-├── cnn_face_classifier.h5 # Trained CNN model
+├── dataset/ # Raw dataset (images organized in folders per class)
+├── processed_faces/ # Auto-generated cropped/aligned faces
+├── embeddings.npy # Face embeddings (auto-generated)
+├── labels.npy # Corresponding labels (auto-generated)
+├── svm_face_classifier.joblib # Trained SVM model
 ├── label_encoder.joblib # Saved LabelEncoder for decoding predictions
-├── train_model.py # Training script
-├── test_model.py # Test/prediction script
+├── scaler.joblib # Scaler for embedding normalization
+├── image_paths.txt # Mapping of processed images to labels
+├── train_faces.py # Script to process images & train SVM
+├── predict_faces.py # Script to test & search for matches
+├── requirements.txt # Dependencies
+└── README.md # Documentation
 
 ---
 
-## 🛠️ Requirements
-
-- Python 3.x
-- TensorFlow / Keras
-- NumPy
-- scikit-learn
-- joblib
-- matplotlib (for training graphs)
+🛠️ Requirements
+Python 3.x
+PyTorch
+facenet-pytorch
+scikit-learn
+joblib
+Pillow (PIL)
+NumPy
 
 Install dependencies:
 
@@ -32,14 +38,23 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-📈 Model Performance
+🚀 Workflow
+Face Detection & Alignment – Uses MTCNN to crop and align faces from the dataset.
 
-Accuracy: ~88.4%
-Loss: ~3.56
-Validation Split: 0.1
-Optimizer: Adam
-Loss Function: Categorical Crossentropy
+Embedding Extraction – Passes aligned faces through InceptionResnetV1 (FaceNet) to get 512-D embeddings.
+
+SVM Training – Trains a linear SVM on scaled embeddings.
+
+Prediction – Takes a test image, gets its embedding, predicts the label, and searches for matching images.
+
+📈 Model Performance
+Accuracy: ~93%
+
+Validation Split: 0.2 (Stratified)
+
+Classifier: SVM with linear kernel (Calibrated)
+
+Embedding Model: FaceNet (VGGFace2 pretrained)
 
 ✍️ Author
 Dev Patmase
-
