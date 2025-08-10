@@ -40,3 +40,4 @@ image_paths.txt
 *.code-workspace
 *.run
 *.code-runner
+tempCodeRunnerFile.py
