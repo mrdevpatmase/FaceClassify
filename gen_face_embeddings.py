@@ -1,42 +1,33 @@
-import os
+import numpy as np
 from PIL import Image
 import torch
-import numpy as np
 from facenet_pytorch import InceptionResnetV1
 from torchvision import transforms
 
-processed_folder = r"C:\Users\devpa\OneDrive\Desktop\FaceClassify\processed_faces"
+MAPPING_FILE = "image_paths.txt"
+EMBEDDINGS_FILE = "embeddings.npy"
+LABELS_FILE = "labels.npy"
 
-model = InceptionResnetV1(pretrained='vggface2').eval()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = InceptionResnetV1(pretrained='vggface2').eval().to(device)
 
-preprocess = transforms.Compose([
+transform = transforms.Compose([
     transforms.Resize((160, 160)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5], std=[0.5])
+    transforms.ToTensor()
 ])
 
-embeddings = []
-labels = []
-
-for image in os.listdir(processed_folder):
-    image_path = os.path.join(processed_folder, image)
-    
-    try:
-        img = Image.open(image_path).convert('RGB')
-        img_tensor = preprocess(img).unsqueeze(0)
-
+embeddings, labels = [], []
+with open(MAPPING_FILE, "r", encoding="utf-8") as f:
+    for line in f:
+        img_path, label = line.strip().split("|")
+        img = Image.open(img_path).convert("RGB")
+        img_tensor = transform(img).unsqueeze(0).to(device)
         with torch.no_grad():
-            embedding = model(img_tensor).squeeze().numpy()
-
-        embeddings.append(embedding)
-
-        label = image.split("_")[0].lower()  
+            emb = model(img_tensor).cpu().numpy()[0]
+        embeddings.append(emb)
         labels.append(label)
+        print(f"✅ Processed {img_path}")
 
-    except Exception as e:
-        print(f"❌ Error processing {image_path}: {e}")
-
-np.save("embeddings.npy", np.array(embeddings))
-np.save("labels.npy", np.array(labels))
-
-print("✅ Embeddings and labels saved.")
+np.save(EMBEDDINGS_FILE, embeddings)
+np.save(LABELS_FILE, labels)
+print("\n💾 Embeddings & labels saved.")
